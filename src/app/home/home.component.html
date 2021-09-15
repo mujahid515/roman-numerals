@@ -1,1 +1,17 @@
-<p>home works!</p>
+<form (submit)="convert($event)">
+    <fieldset class="uk-fieldset">
+        <legend class="uk-legend">Legend</legend>
+        <div class="uk-margin">
+            <select class="uk-select" #selectValue>
+                <option value="numberToRoman">Convert Normal Number to Roman Numerals</option>
+                <option value="romanToNumber">Convert Roman Numerals to Normal Number</option>
+            </select>
+        </div>
+        <div class="uk-margin">
+            <input class="uk-input" type="text" placeholder="Input" #inputValue>
+        </div>
+    </fieldset>
+    <p uk-margin>
+        <button class="uk-button uk-button-default">Convert</button>
+    </p>
+</form>
