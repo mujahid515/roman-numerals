@@ -1,0 +1,26 @@
+/* Custom SCSS/SASS Files */
+@import 'variables';
+@import 'mixins';
+@import 'custom';
+/* UIKit */
+@import "../../node_modules/uikit/src/scss/variables-theme.scss";
+@import "../../node_modules/uikit/src/scss/mixins-theme.scss";
+@import "../../node_modules/uikit/src/scss/uikit-theme.scss";
+
+.uk-button {
+    border-radius: 5px;
+}
+
+.uk-modal-dialog {
+    border-radius: 5px;
+    font-family: 'Cinzel', serif;
+    text-transform: uppercase;
+    text-align: center;
+    position: relative;
+    display: block;
+}
+
+.uk-modal-footer {
+    border-radius: 5px;
+}
+

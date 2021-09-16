@@ -1,17 +1,47 @@
-<form (submit)="convert($event)">
-    <fieldset class="uk-fieldset">
-        <legend class="uk-legend">Legend</legend>
-        <div class="uk-margin">
-            <select class="uk-select" #selectValue>
-                <option value="numberToRoman">Convert Normal Number to Roman Numerals</option>
-                <option value="romanToNumber">Convert Roman Numerals to Normal Number</option>
-            </select>
+<div class="uk-section bg">
+    <div uk-slideshow="animation: fade" class="bgImg" #slideShow>
+        <ul class="uk-slideshow-items">
+            <li>
+                <img src="assets/images/roman-building.jpg" alt="Roman Numerals Converter" uk-cover>
+            </li>
+            <li>
+                <img src="assets/images/roman-building-2.jpg" alt="Convert Roman Numerals" uk-cover>
+            </li>
+            <li>
+                <img src="assets/images/roman-building-3.jpg" alt="Numbers to Roman Numerals" uk-cover>
+            </li>
+        </ul>
+    </div>
+    <img >
+    <div class="uk-container uk-container-small customTop height100">
+        <div class="uk-child-width-1-1@s uk-grid-match pd50" uk-grid>
+            <div class="uk-card uk-card-default uk-card-body">
+                <h1 class="uk-card-title">Roman Numeral Converter</h1>
+                <form (submit)="convert($event)" (key.enter)="convert($event)">
+                    <div class="uk-margin">
+                        <select class="uk-select" #selectValue (change)="changeCurrentSelect($event)">
+                            <option value="numberToRoman">Convert Normal Number to Roman Numerals</option>
+                            <option value="romanToNumber">Convert Roman Numerals to Normal Number</option>
+                        </select>
+                    </div>
+                    <div class="uk-margin">
+                        <input class="uk-input" type="text" placeholder="{{ currentSelect }}" #inputValue>
+                    </div>
+                    <div>
+                        <button class="uk-button uk-button-primary">Convert <img src="assets/images/star.svg" class="star" /></button>
+                    </div>
+                </form>
+                <div *ngIf="result" class="uk-margin">
+                    <div class="uk-card uk-card-default uk-card-body">
+                        <div class="result">
+                            <h1 class="mgBtm0">{{ result }}</h1>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="uk-margin">
-            <input class="uk-input" type="text" placeholder="Input" #inputValue>
-        </div>
-    </fieldset>
-    <p uk-margin>
-        <button class="uk-button uk-button-default">Convert</button>
-    </p>
-</form>
+    </div>
+    <div class="uk-margin">
+        <a href="https://en.wikipedia.org/wiki/Roman_numerals">Learn more about Roman Numerals.</a>
+    </div>
+</div>

@@ -11,38 +11,53 @@ export class HomeComponent implements OnInit {
 
   @ViewChild("inputValue", { read: ElementRef, static: true }) inputValue!: ElementRef;
   @ViewChild("selectValue", { read: ElementRef, static: true }) selectValue!: ElementRef;
+  @ViewChild("slideShow", { read: ElementRef, static: true }) slideShow!: ElementRef;
+
+  result: string | undefined = '';
+
+  currentSelect = 'Type any number from 1 to 3,000...';
+
+  levelUp = new Audio('/assets/sounds/level-up.wav');
+  errorSound = new Audio('/assets/sounds/error.wav');
 
   constructor(private numeralsService: NumeralsService) { }
 
   ngOnInit(): void {
+    UIkit.slideshow(this.slideShow.nativeElement).startAutoplay();
   }
 
   convert(event: any) {
     event.preventDefault();
     const value = this.inputValue.nativeElement.value;
     if(this.selectValue.nativeElement.value == 'numberToRoman') {
-      this.numeralsService.normalNumbersToRomanNumerals(value).then((resp) => {
-        console.log('Numeral: ', resp);
-      }).catch((error) => {
-        UIkit.modal.alert(error);
-      });
+      this.result = this.numeralsService.normalNumbersToRomanNumerals(Number(value));
+      if(this.result === undefined) {
+        UIkit.modal.alert('The Romans never had such numbers! Try entering a number between 1 and 3,000');
+        this.errorSound.play();
+      } else {
+        // play sound
+        this.levelUp.play();
+      }
     } else if(this.selectValue.nativeElement.value == 'romanToNumber') {
-      this.numeralsService.romanNumeralsToNormalNumbers(value).then((resp) => {
-        console.log('Number: ', resp);
-      }).catch((error) => {
-        UIkit.modal.alert(error);
-      });
+      const res = this.numeralsService.romanNumeralsToNormalNumbers(value);
+      if(res === undefined) {
+        UIkit.modal.alert('The Romans never had such numerals! Try entering any of the following characters I, V, X, L, C, D or M');
+        this.errorSound.play();
+      } else {
+        this.result = res.toString();
+        // play sound
+        this.levelUp.play();
+      }
     }
   }
 
-  convertNumeral(event: any) {
-    event.preventDefault();
-    const value = this.inputValue.nativeElement.value;
-    this.numeralsService.normalNumbersToRomanNumerals(value).then((resp) => {
-      console.log('resp: ', resp);
-    }).catch((error) => {
-      UIkit.modal.alert(error);
-    });
+  changeCurrentSelect(event: any) {
+    this.inputValue.nativeElement.value = '';
+    if(event.target.value == 'numberToRoman') {
+      this.currentSelect = 'Type any number from 1 to 3,000...';
+    } else {
+      this.currentSelect = 'Type a valid Roman Numeral. E.g. XII...';
+    }
   }
 
 }

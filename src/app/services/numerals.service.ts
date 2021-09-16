@@ -5,24 +5,10 @@ type tDigitOptions = {
   [key: string]: Array<string>
 }
 
-type tNumberOptions = {
-  [key: string]: {
-    smallerSymbols: Array<string>,
-    greaterSymbols: Array<string>,
-    allowedBefore: Array<string>,
-    allowedAfter: Array<string>,
-    duplicatesAllowed: boolean,
-    singleVal: number
-  }
-}
-
 @Injectable({
   providedIn: 'root'
 })
 export class NumeralsService {
-
-  testVariableNormalNumber: number = 0;
-  testVariableRomanNumeral: string = '';
 
   numeralNumberConversion: tDigitOptions = {
     digits1: [ 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX' ],
@@ -31,157 +17,112 @@ export class NumeralsService {
     digits4: [ 'M', 'MM', 'MMM' ]
   }
 
-  numberNumeralConversion: tNumberOptions = {
-    I: { smallerSymbols: [], greaterSymbols: ['V', 'X', 'L', 'C', 'D', 'M'], allowedBefore: [], allowedAfter: ['I', 'V', 'X'], duplicatesAllowed: true, singleVal: 1 },
-    V: { smallerSymbols: ['I'], greaterSymbols: ['X', 'L', 'C', 'D', 'M'], allowedBefore: ['I'], allowedAfter: ['I'], duplicatesAllowed: false, singleVal: 5 },
-    X: { smallerSymbols: ['I', 'V'], greaterSymbols: ['L', 'C', 'D', 'M'], allowedBefore: ['I', 'L'], allowedAfter: ['I', 'V', 'X', 'L', 'C'], duplicatesAllowed: true, singleVal: 10 },
-    L: { smallerSymbols: ['I', 'V', 'X'], greaterSymbols: ['C', 'D', 'M'], allowedBefore: ['X'], allowedAfter: ['I', 'V'], duplicatesAllowed: false, singleVal: 50 },
-    C: { smallerSymbols: ['I', 'V', 'X', 'L'], greaterSymbols: ['D', 'M'], allowedBefore: ['X', 'D'], allowedAfter: ['I', 'V', 'X', 'L', 'C', 'D', 'M'], duplicatesAllowed: true, singleVal: 100 },
-    D: { smallerSymbols: ['I', 'V', 'X', 'L', 'C'], greaterSymbols: ['M'], allowedBefore: ['C'], allowedAfter: ['I', 'V', 'X', 'C'], duplicatesAllowed: false, singleVal: 500 },
-    M: { smallerSymbols: ['I', 'V', 'X', 'L', 'C', 'D'], greaterSymbols: [], allowedBefore: ['C'], allowedAfter: ['I', 'V', 'X', 'L', 'C', 'D'], duplicatesAllowed: true, singleVal: 1000 },
+  threeThousandNumeralsArray: Array<{ numeral: string, number: number }>;
+
+  constructor() {
+    this.threeThousandNumeralsArray = Array.from(Array(3000)).map((e,i) => {
+      let finalNumeral = '';
+      const finalNumber = i+1;
+      // Determine how many digits the number is
+      const finalNumberSplit: Array<string> = finalNumber.toString().split('');
+      const digits = finalNumberSplit.length;
+      if(digits == 1) {
+        finalNumeral = this.numeralNumberConversion.digits1[i];
+      } else if(digits == 2) {
+        if(finalNumberSplit[1] == '0') {
+          // This means it is either 10,20,30,40... all multiples of ten that are two digits
+          finalNumeral = this.numeralNumberConversion.digits2[Number(finalNumberSplit[0])-1];
+        } else {
+          // All two digit numbers that are not a multiple of ten
+          const firstDigit = this.numeralNumberConversion.digits2[Number(finalNumberSplit[0])-1];
+          const secondDigit = this.numeralNumberConversion.digits1[Number(finalNumberSplit[1])-1];
+          finalNumeral = firstDigit+secondDigit;
+        }
+      } else if(digits == 3) {
+        if(finalNumberSplit[2] == '0' && finalNumberSplit[1] == '0') {
+          // This means it is either 100,200,300,400... all multiples of 100 that are three digits
+          finalNumeral = this.numeralNumberConversion.digits3[Number(finalNumberSplit[0])-1];
+        } else if(finalNumberSplit[1] == '0') {
+          // All three digit numbers that are not a multiple of 100
+          // And within the first 9 of that multiple of 100 range. E.g. 101-109, 201-209, 301-309 etc
+          const firstDigit = this.numeralNumberConversion.digits3[Number(finalNumberSplit[0])-1];
+          const thirdDigit = this.numeralNumberConversion.digits1[Number(finalNumberSplit[2])-1];
+          finalNumeral = firstDigit+thirdDigit;
+        } else if(finalNumberSplit[2] == '0') {
+          // All 3 digit multiples of ten. E.g. 110, 120, 230, 360 etc
+          const firstDigit = this.numeralNumberConversion.digits3[Number(finalNumberSplit[0])-1];
+          const secondDigit = this.numeralNumberConversion.digits2[Number(finalNumberSplit[1])-1];
+          finalNumeral = firstDigit+secondDigit;
+        } else {
+          // All other 3 digit numbers
+          const firstDigit = this.numeralNumberConversion.digits3[Number(finalNumberSplit[0])-1];
+          const secondDigit = this.numeralNumberConversion.digits2[Number(finalNumberSplit[1])-1];
+          const thirdDigit = this.numeralNumberConversion.digits1[Number(finalNumberSplit[2])-1];
+          finalNumeral = firstDigit+secondDigit+thirdDigit;
+        }
+      } else if (digits == 4) {
+        if(finalNumberSplit[3] == '0' && finalNumberSplit[2] == '0' && finalNumberSplit[1] == '0') {
+          // This means it is either 1000,2000 or 3000
+          finalNumeral = this.numeralNumberConversion.digits4[Number(finalNumberSplit[0])-1];
+        } else if(finalNumberSplit[2] == '0' && finalNumberSplit[1] == '0') {
+          // All four digit numbers that are not a multiple of 1000
+          // And within the first 9 of that multiple of 1000 range. E.g. 1001-1009, 2001-2009, 3001-3009 etc
+          const firstDigit = this.numeralNumberConversion.digits4[Number(finalNumberSplit[0])-1];
+          const fourthDigit = this.numeralNumberConversion.digits1[Number(finalNumberSplit[3])-1];
+          finalNumeral = firstDigit+fourthDigit;
+        } else if(finalNumberSplit[3] == '0' && finalNumberSplit[1] == '0') {
+          // All 4 digit multiples of ten not going into hundreds of that range. E.g. 1010, 2020, 2030, 2090 etc
+          // E.g. of what this does NOT do: 1100, 1200, 2200 etc
+          const firstDigit = this.numeralNumberConversion.digits4[Number(finalNumberSplit[0])-1];
+          const thirdDigit = this.numeralNumberConversion.digits2[Number(finalNumberSplit[2])-1];
+          finalNumeral = firstDigit+thirdDigit;
+        } else if(finalNumberSplit[3] == '0' && finalNumberSplit[2] == '0') {
+          // All 4 digit multiples of hundred going into hundreds of that range. E.g. 1100, 2100, 2300, 2900 etc
+          const firstDigit = this.numeralNumberConversion.digits4[Number(finalNumberSplit[0])-1];
+          const secondDigit = this.numeralNumberConversion.digits3[Number(finalNumberSplit[1])-1];
+          finalNumeral = firstDigit+secondDigit;
+        } else if(finalNumberSplit[1] == '0') {
+          // All 4 digits which have 0 as their second digit. E.g. 1010, 2032, 2099 etc
+          const firstDigit = this.numeralNumberConversion.digits4[Number(finalNumberSplit[0])-1];
+          const thirdDigit = this.numeralNumberConversion.digits2[Number(finalNumberSplit[2])-1];
+          const fourthDigit = this.numeralNumberConversion.digits1[Number(finalNumberSplit[3])-1];
+          finalNumeral = firstDigit+thirdDigit+fourthDigit;
+        } else if(finalNumberSplit[2] == '0') {
+          // All 4 digits which have 0 as their third digit. E.g. 1101, 2102, 2509 etc
+          // Also NOT ending in 0 like 1100, 2100, 2500 etc
+          const firstDigit = this.numeralNumberConversion.digits4[Number(finalNumberSplit[0])-1];
+          const secondDigit = this.numeralNumberConversion.digits3[Number(finalNumberSplit[1])-1];
+          const fourthDigit = this.numeralNumberConversion.digits1[Number(finalNumberSplit[3])-1];
+          finalNumeral = firstDigit+secondDigit+fourthDigit;
+        } else if(finalNumberSplit[3] == '0') {
+          // All 4 digits which have 0 as their fourth digit. E.g. 1110, 2120, 2530 etc
+          // Also a multiple of ten
+          const firstDigit = this.numeralNumberConversion.digits4[Number(finalNumberSplit[0])-1];
+          const secondDigit = this.numeralNumberConversion.digits3[Number(finalNumberSplit[1])-1];
+          const thirdDigit = this.numeralNumberConversion.digits2[Number(finalNumberSplit[2])-1];
+          finalNumeral = firstDigit+secondDigit+thirdDigit;
+        } else {
+          // All other 4 digit numbers
+          const firstDigit = this.numeralNumberConversion.digits4[Number(finalNumberSplit[0])-1];
+          const secondDigit = this.numeralNumberConversion.digits3[Number(finalNumberSplit[1])-1];
+          const thirdDigit = this.numeralNumberConversion.digits2[Number(finalNumberSplit[2])-1];
+          const fourthDigit = this.numeralNumberConversion.digits1[Number(finalNumberSplit[3])-1];
+          finalNumeral = firstDigit+secondDigit+thirdDigit+fourthDigit;
+        }
+      }
+      const obj = { numeral: finalNumeral, number: finalNumber }
+      return obj;
+    })
   }
 
-  constructor() { }
-
   normalNumbersToRomanNumerals(value: number) {
-    this.testVariableNormalNumber = value;
-    return new Promise((resolve, reject) => {
-      // Determine length of number
-      const arrayOfDigits = value.toString().split('');
-      const lengthOfNumber = arrayOfDigits.length;
-      if(value <= 3000 && value !== 0) {
-        let finalNumeral: string = '';
-        for(let i = 0; i < lengthOfNumber; i++) {
-          // If 0 then skip as there is no roman numeral value for 0
-          if(arrayOfDigits[i] != '0') {
-            const index = Number(arrayOfDigits[i])-1;
-            // The -i below helps to go down the numeralNumberConversion keys as the for loop goes through all the digits of the number
-            finalNumeral += this.numeralNumberConversion['digits'+(lengthOfNumber-i)][index];
-          }
-        }
-        this.testVariableRomanNumeral = finalNumeral;
-        resolve(finalNumeral);
-      } else {
-        reject('The Romans never had such numbers! Try entering a number above 0 and below 3,000');
-      }
-    });
+    const result = this.threeThousandNumeralsArray.find(x => x.number === value)?.numeral;
+    return result;
   }
 
   romanNumeralsToNormalNumbers(value: string) {
-    this.testVariableRomanNumeral = value;
-    // split up string into individual letters
-    const arrayOfLetters = value.split('');
-    let finalNumber: number = 0;
-    let previousLetter: any = '';
-    let currentLetter: string = '';
-    let numeralStorage: Array<string> = [];
-    let numeralStorageTemp = ''; // Used to temporarily store numerals until up to 3 intervals. Then this is cleared.
-    let count = 0;
-    let countNumeral = '';
-    function doChecks(letter: string, numberNumeralConversion: tNumberOptions) {
-      return new Promise((resolve, reject) => {
-        currentLetter = letter;
-        // Check to see if previous letter is in allowedBefore
-        if(numberNumeralConversion[currentLetter].allowedBefore.indexOf(previousLetter) !== -1) {
-          // Yes it has been found in allowedBefore
-          // This number is also finalised as you can't have multiple smaller symbols before a greater symbol e.g. IIX
-          numeralStorage.push(previousLetter+currentLetter);
-          resolve(true);
-        } else if(numberNumeralConversion[currentLetter].allowedAfter.indexOf(previousLetter) !== -1) {
-          // Check to see if current letter is in allowedAfter of previousLetter
-          // Yes it has been found in allowedAfter
-          // We need to wait and see if multiple letters of the same value appear again.
-          // If so the max is 3 times after which this is finalised.
-          if(arrayOfLetters.length == 2) {
-            numeralStorage.push(previousLetter+currentLetter);
-            resolve(true);
-          } else if(currentLetter == countNumeral) {
-            numeralStorageTemp += currentLetter;
-            if(count == arrayOfLetters.length-2 || count == 2) {
-              numeralStorage.push(numeralStorageTemp);
-              numeralStorageTemp = '';
-              countNumeral = '';
-              count = 0;
-              resolve(true);
-            }
-            count++;
-            resolve(true);
-          } else {
-            numeralStorageTemp += previousLetter+currentLetter;
-            countNumeral = currentLetter;
-            count++;
-            resolve(true);
-          }
-        } else {
-          // Neither allowed before or after therefore it is a finalised numeral
-          numeralStorage.push(currentLetter);
-          resolve(true);
-        }
-      });
-    }
-    return new Promise((resolve, reject) => {
-      for(let i = 0; i < arrayOfLetters.length; i++) {
-        // Rule 1: When a smaller symbol is after a greater symbol, it's added (up to a max of 3 - Rule 4).
-        // Rule 2: If a symbol comes after itself, it's added (up to a max of 3 - Rule 4).
-        // Rule 3: When a smaller symbol appears before a greater symbol, it is subtracted. (Can't have multiple smaller symbols before a greater symbol e.g. IIX)
-        // Rule 4: The same symbol cannot be used more than three times in a row.
-        if(
-          arrayOfLetters[i] === 'I' ||
-          arrayOfLetters[i] === 'V' ||
-          arrayOfLetters[i] === 'X' ||
-          arrayOfLetters[i] === 'L' ||
-          arrayOfLetters[i] === 'C' ||
-          arrayOfLetters[i] === 'D' ||
-          arrayOfLetters[i] === 'M'
-        ) {
-          if(i == 0 && arrayOfLetters.length == 1) {
-            resolve(this.numberNumeralConversion[arrayOfLetters[i]].singleVal);
-          } else if(i == 0 && arrayOfLetters.length != 1) {
-            previousLetter = arrayOfLetters[i];
-            continue;
-          } else {
-            doChecks(arrayOfLetters[i], this.numberNumeralConversion).then(() => {
-              if(i+1 == arrayOfLetters.length) {
-                // We need to view the numerals collected in numeralStorage and convert to numbers
-                let finalNumberList = [];
-                for(let y = 0; y < numeralStorage.length; y++) {
-                  let section = 1;
-                  let index = this.numeralNumberConversion['digits'+section].indexOf(numeralStorage[y]);
-                  if(index == -1) {
-                    section = 2;
-                    index = this.numeralNumberConversion['digits'+section].indexOf(numeralStorage[y]);
-                    if(index == -1) {
-                      section = 3;
-                      index = this.numeralNumberConversion['digits'+section].indexOf(numeralStorage[y]);
-                      if(index == -1) {
-                        section = 4;
-                        index = this.numeralNumberConversion['digits'+section].indexOf(numeralStorage[y]);
-                      }
-                    }
-                  }
-                  if(section == 4) {
-                    finalNumberList.push((index+1)*1000);
-                  } else if (section == 3) {
-                    finalNumberList.push((index+1)*100);
-                  } else if (section == 2) {
-                    finalNumberList.push((index+1)*10);
-                  } else if (section == 1) {
-                    finalNumberList.push(index+1);
-                  }
-                }
-                resolve(finalNumberList);
-              }
-            }).catch(() => {
-              return;
-            });
-          }
-        } else {
-          // None of the accepted Roman Numeral characters exist in this string
-          reject('The Romans never had such numerals! Try entering any of the following characters I, V, X, L, C, D or M')
-        }
-      }
-    });
+    const result: any = this.threeThousandNumeralsArray.find(x => x.numeral === value)?.number;
+    return result;
   }
-
 
 }
